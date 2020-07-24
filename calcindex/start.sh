@@ -1,3 +1,3 @@
 #!/bin/bash
-sleep 40
+sleep 110
 python CalcIndex.py
