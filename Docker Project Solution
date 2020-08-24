@@ -1,0 +1,137 @@
+FROM python:3
+
+RUN mkdir /bata
+WORKDIR /bata
+
+COPY requirement.txt requirement.txt
+RUN pip install -r requirement.txt
+
+COPY . .
+
+LABEL version="1.0"
+
+CMD sh start.sh
+
+-------------------------------------------------------------------
+
+FROM python:3
+
+RUN mkdir /calcindex
+WORKDIR /calcindex
+
+COPY requirement.txt requirement.txt
+RUN pip install -r requirement.txt
+
+COPY . .
+
+LABEL version="1.0"
+
+CMD sh start.sh
+
+-------------------------------------------------------------------
+
+FROM python:3
+
+RUN mkdir /tata
+WORKDIR /tata
+
+COPY requirement.txt requirement.txt
+RUN pip install -r requirement.txt
+
+COPY . .
+
+LABEL version="1.0"
+
+CMD sh start.sh
+------------------------------------------------------------------
+
+FROM python:3
+
+RUN mkdir /ui
+WORKDIR /ui
+
+COPY requirement.txt requirement.txt
+RUN pip install -r requirement.txt
+
+COPY . .
+
+LABEL version="1.0"
+
+CMD sh start.sh
+
+--------------------------------------------------------
+
+FROM mysql
+ENV MYSQL_DATABASE=BHARATINDEX
+ENV MYSQL_ROOT_PASSWORD=root
+
+ADD  BHARATINDEX_schema.sql /docker-entrypoint-initdb.d/BHARATINDEX_schema.sql
+RUN chmod -R 775 /docker-entrypoint-initdb.d
+RUN chmod -R 775 /docker-entrypoint-initdb.d/BHARATINDEX_schema.sql
+
+EXPOSE 3306
+CMD ["mysqld"] 
+
+
+----------------------------------------------------------
+
+version: '3'
+services:
+  redis:
+    image: redis
+    container_name: redis
+    env_file:
+      - secret-stuff.env
+    networks:
+            - "flasknet"
+  mysql:
+    build: mysql
+    container_name: mysql
+    env_file:
+      - secret-stuff.env
+    networks:
+            - "flasknet"
+  tata:
+    build: tata
+    container_name: tata
+    networks:
+            - "flasknet"
+    env_file:
+      - secret-stuff.env
+  bata:
+    build: bata
+    container_name: bata
+    networks:
+            - "flasknet"
+    env_file:
+      - secret-stuff.env
+  ui:
+    build: ui
+    container_name: ui
+    networks:
+            - "flasknet"
+    ports:
+      - 5000:5000
+    env_file:
+      - secret-stuff.env
+  calcindex:
+    build: calcindex
+    container_name: calcindex
+    networks:
+            - "flasknet"
+    env_file:
+      - secret-stuff.env
+networks:
+    flasknet :
+
+------------------------
+cat secret-stuff.env
+
+MYSQL_DATABASE=BHARATINDEX
+MYSQL_ROOT_PASSWORD=root
+REDIS_HOST=redis
+MYSQL_HOST=mysql
+REDIS_PORT=6379
+MYSQL_USER=root
+
+-------------
